@@ -1,0 +1,34 @@
+{
+  "name": "liquid-staking-contracts",
+  "version": "0.1.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "@openzeppelin/contracts": "3.4.2",
+    "@openzeppelin/contracts-upgradeable": "3.4.2"
+  },
+  "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.0.3",
+    "@nomicfoundation/hardhat-verify": "^2.0.7",
+    "@nomiclabs/hardhat-etherscan": "^3.1.8",
+    "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "@openzeppelin/hardhat-upgrades": "^1.12.0",
+    "@openzeppelin/test-helpers": "^0.5.15",
+    "@typechain/ethers-v5": "^8.0.5",
+    "@typechain/hardhat": "^3.0.0",
+    "@types/chai": "^4.3.0",
+    "@types/mocha": "^9.0.0",
+    "@types/node": "^16.11.12",
+    "chai": "^4.3.4",
+    "ethereum-waffle": "^3.4.0",
+    "ethers": "^5.0.0",
+    "hardhat": "^2.22.3",
+    "hardhat-console": "^1.0.0",
+    "hardhat-gas-reporter": "^1.0.6",
+    "solhint": "^3.3.6",
+    "solidity-coverage": "^0.7.17",
+    "ts-node": "^10.4.0",
+    "typechain": "^6.0.5",
+    "typescript": "^4.5.2"
+  }
+}
