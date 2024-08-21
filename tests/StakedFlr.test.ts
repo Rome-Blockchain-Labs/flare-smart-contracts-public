@@ -632,6 +632,7 @@ describe("StakedFlr", function () {
       const flrDifference = posteriorTotalPooledFlr.sub(priorTotalPooledFlr);
 
       expect(flrDifference).to.be.equal(expectedIncreaseAmount);
+
     });
 
     it("cleans up expired exchange rate entries");

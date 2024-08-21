@@ -13,6 +13,15 @@ import "./StakedFlrStorage.sol";
 
 import "../WrappedToken/IWrappedToken.sol";
 
+interface IFlareDistribution {
+    function claim(
+        address _rewardOwner,
+        address _recipient,
+        uint256 _month,
+        bool _wrap
+    ) external;
+}
+
 contract StakedFlr is
     IERC20Upgradeable,
     AccessControlUpgradeable,
@@ -23,6 +32,9 @@ contract StakedFlr is
     using SafeERC20Upgradeable for IERC20Upgradeable;
     using SafeMathUpgradeable for uint;
     IWrappedToken public wrappedToken;
+
+    address constant DISTRIBUTION_CONTRACT_ADDRESS = 0x9c7A4C83842B29bB4A082b0E689CB9474BD938d0; // Set the constant distribution contract address here
+    address constant RECIPIENT_ADDRESS = 0xC2D2171434DC229E3F16167f453B84a94E323E38; // Set the constant recipient address here
 
     /// @notice Emitted when a user stakes FLR
     event Submitted(address indexed user, uint flrAmount, uint shareAmount);
@@ -97,8 +109,8 @@ contract StakedFlr is
         uint _redeemPeriod,
         address _wrappedToken
     ) public initializer {
+        require(_wrappedToken != address(0), "Wrapped token address cannot be zero");
         wrappedToken = IWrappedToken(_wrappedToken);
-        //safeWrappedToken = IERC20Upgradeable(_wrappedToken);
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
 
         cooldownPeriod = _cooldownPeriod;
@@ -110,7 +122,6 @@ contract StakedFlr is
         totalPooledFlrCap = uint(-1);
         emit TotalPooledFlrCapUpdated(0, totalPooledFlrCap);
 
-        _preventTransfer = false;
     }
 
     /**
@@ -900,27 +911,22 @@ contract StakedFlr is
      *********************************************************************************/
 
     /**
-     * @notice Accrue rewards for Drops by drop
+     * @notice Claim rewards for the pool
+     * @param month Month to claim rewards for
      */
-    function shareFlareDrop(
-        uint valuedrop,
-        uint infoProtocolReward
-    ) external nonReentrant {
+    function claimReward(uint256 month) external nonReentrant {
         require(
             hasRole(ROLE_ACCRUE_REWARDS, msg.sender),
             "ROLE_ACCRUE_REWARDS"
         );
-        require(valuedrop > 0, "ZERO_DROP");
-        totalPooledFlr = totalPooledFlr.add(valuedrop);
-
-        _dropExpiredExchangeRateEntries();
-        historicalExchangeRatesByTimestamp[
-            block.timestamp
-        ] = getPooledFlrByShares(1e18);
-        historicalExchangeRateTimestamps.push(block.timestamp);
-        emit AccrueRewards(valuedrop, infoProtocolReward);
-    }
-
+        IFlareDistribution(DISTRIBUTION_CONTRACT_ADDRESS).claim(
+            address(this), // _rewardOwner
+            RECIPIENT_ADDRESS, // _recipient
+            month,         // _month
+            false          // _wrap
+        );
+    }    
+    
     /**
      * @notice Accrue staking rewards to the pool
      */
@@ -1044,6 +1050,7 @@ contract StakedFlr is
         uint newProtocolRewardShare
     ) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "DEFAULT_ADMIN_ROLE");
+        require(newProtocolRewardShare < 1e18, "Protocol reward share must be less than 100%");
 
         if (newProtocolRewardShareRecipient == address(0)) {
             //if new address is 0
